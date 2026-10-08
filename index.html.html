@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pintar Bahasa Tingkatan 1</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        display: ['Fredoka', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                        },
+                        accent: {
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 50%, #fef3c7 100%);
+            min-height: 100vh;
+        }
+        .font-display {
+            font-family: 'Fredoka', cursive;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+        .custom-shadow {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        }
+        .bounce-hover:hover {
+            transform: translateY(-4px);
+        }
+        .btn-press:active {
+            transform: translateY(2px);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #2563eb, #0d9488);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="text-slate-800 pb-12 antialiased selection:bg-sky-200 selection:text-sky-900">
+
+    <!-- Header / Navbar -->
+    <header class="sticky top-0 z-50 glass-card border-b border-slate-200/60 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-3">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('games')">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-teal-400 flex items-center justify-center text-white shadow-md font-display font-bold text-xl">
+                    BM
+                </div>
+                <div>
+                    <h1 class="font-display text-lg sm:text-xl font-bold text-slate-800 leading-tight">Pintar Bahasa</h1>
+                    <p class="text-xs text-slate-500 font-medium">Tingkatan 1 • Pola Ayat & Perbandingan Semacam</p>
+                </div>
+            </div>
+
+            <!-- Stats Bar & Controls -->
+            <div class="flex items-center gap-3 sm:gap-4 ml-auto">
+                <div class="bg-amber-100/80 border border-amber-200 text-amber-800 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
+                    <span>🔥</span>
+                    <span id="streakCount">0</span>
+                    <span class="hidden sm:inline">Kombo</span>
+                </div>
+                <div class="bg-emerald-100/80 border border-emerald-200 text-emerald-800 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs sm:text-sm font-bold">
+                    <span>⭐</span>
+                    <span id="totalPoints">0</span>
+                    <span class="hidden sm:inline">Mata</span>
+                </div>
+                <button id="soundToggleBtn" onclick="toggleAudio()" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition" title="Tukar Bunyi">
+                    <span id="soundIcon">🔊</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="max-w-6xl mx-auto px-4 pt-1 flex gap-2 overflow-x-auto text-xs sm:text-sm font-medium border-t border-slate-100 mt-2">
+            <button onclick="switchTab('games')" id="tab-games" class="tab-btn px-4 py-2 border-b-2 border-sky-500 text-sky-600 font-bold flex items-center gap-2 transition whitespace-nowrap">
+                <span>🎮</span> Mod Permainan
+            </button>
+            <button onclick="switchTab('notes')" id="tab-notes" class="tab-btn px-4 py-2 border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex items-center gap-2 transition whitespace-nowrap">
+                <span>📚</span> Nota & Imbasan Tatabahasa
+            </button>
+            <button onclick="switchTab('stats')" id="tab-stats" class="tab-btn px-4 py-2 border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex items-center gap-2 transition whitespace-nowrap">
+                <span>🏆</span> Pencapaian & Prestasi
+            </button>
+        </nav>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-6xl mx-auto px-4 mt-6">
+
+        <!-- ================= TAB 1: GAMES HUB ================= -->
+        <section id="section-games" class="tab-content space-y-6">
+            <!-- Game Selection Cards (Shown when no game is active) -->
+            <div id="gameMenu" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Game 1 Card -->
+                <div class="glass-card rounded-3xl p-6 border border-sky-100 hover:border-sky-300 transition duration-300 shadow-sm hover:shadow-xl flex flex-col justify-between group">
+                    <div>
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-400 to-blue-600 text-white flex items-center justify-center text-2xl shadow-lg mb-4 group-hover:scale-110 transition duration-300">
+                            🧩
+                        </div>
+                        <div class="inline-block px-3 py-1 bg-sky-100 text-sky-800 text-xs font-bold rounded-full mb-2">Pola Ayat Dasar</div>
+                        <h2 class="font-display text-2xl font-bold text-slate-800 mb-2">Cabaran Pantas Pola Ayat</h2>
+                        <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                            Kenal pasti 4 pola ayat dasar (FN+FN, FN+FK, FN+FA, FN+FS) dengan pantas! Uji kelajuan dan ketepatan tatabahasa anda dalam cabaran penuh 20 soalan!
+                        </p>
+                        <div class="flex items-center gap-2 text-xs text-slate-500 font-medium mb-6">
+                            <span>🎯 20 Soalan / Pusingan</span>
+                            <span>•</span>
+                            <span>⏱️ Tanpa Had Masa</span>
+                            <span>•</span>
+                            <span>🔥 Bonus Kombo</span>
+                        </div>
+                    </div>
+                    <button onclick="startGame('pola')" class="w-full py-3.5 px-6 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-bold rounded-2xl shadow-lg shadow-sky-500/25 transition duration-200 flex items-center justify-center gap-2 btn-press">
+                        <span>Mula Bermain (20 Soalan)</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </button>
+                </div>
+
+                <!-- Game 2 Card -->
+                <div class="glass-card rounded-3xl p-6 border border-teal-100 hover:border-teal-300 transition duration-300 shadow-sm hover:shadow-xl flex flex-col justify-between group">
+                    <div>
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-teal-400 to-emerald-600 text-white flex items-center justify-center text-2xl shadow-lg mb-4 group-hover:scale-110 transition duration-300">
+                            🦊
+                        </div>
+                        <div class="inline-block px-3 py-1 bg-teal-100 text-teal-800 text-xs font-bold rounded-full mb-2">Perbandingan Semacam</div>
+                        <h2 class="font-display text-2xl font-bold text-slate-800 mb-2">Padanan Perbandingan Semacam</h2>
+                        <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                            Lengkapkan ungkapan perbandingan semacam seperti "Bijak seperti kancil" dan "Jernih seperti cermin" dalam cabaran padanan interaktif!
+                        </p>
+                        <div class="flex items-center gap-2 text-xs text-slate-500 font-medium mb-6">
+                            <span>✨ Jernih Seperti Cermin</span>
+                            <span>•</span>
+                            <span>🏆 Tingkatkan Memori</span>
+                        </div>
+                    </div>
+                    <button onclick="startGame('perbandingan')" class="w-full py-3.5 px-6 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white font-bold rounded-2xl shadow-lg shadow-teal-500/25 transition duration-200 flex items-center justify-center gap-2 btn-press">
+                        <span>Mula Bermain</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Active Gameplay Container (Hidden by default) -->
+            <div id="activeGameArea" class="hidden glass-card rounded-3xl p-6 sm:p-8 shadow-xl border border-white">
+                <!-- Game Header Bar -->
+                <div class="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-slate-200/80">
+                    <button onclick="quitGame()" class="text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1.5 transition px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                        <span>Kembali ke Menu</span>
+                    </button>
+                    <div class="flex items-center gap-4 text-xs sm:text-sm font-bold">
+                        <span class="text-slate-500">Soalan <span id="currentQNum" class="text-sky-600 text-base">1</span> / <span id="totalQNum">20</span></span>
+                        <div class="w-32 sm:w-48 bg-slate-200 h-3 rounded-full overflow-hidden">
+                            <div id="gameProgressBar" class="bg-gradient-to-r from-sky-500 to-teal-400 h-full w-0 transition-all duration-300"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Question Body -->
+                <div class="py-8 max-w-2xl mx-auto text-center space-y-6">
+                    <div id="questionCategoryBadge" class="inline-block px-3 py-1 bg-amber-100 text-amber-800 text-xs font-bold rounded-full">
+                        Pola Ayat Dasar
+                    </div>
+                    
+                    <div id="questionPrompt" class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200/80 text-lg sm:text-2xl font-bold text-slate-800 leading-snug">
+                        <!-- Question Text Inserted dynamically -->
+                    </div>
+
+                    <!-- Answer Choices Grid -->
+                    <div id="answerOptionsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                        <!-- Dynamic Buttons inserted here -->
+                    </div>
+
+                    <!-- Explanatory Feedback Banner (Appears after answer) -->
+                    <div id="feedbackBanner" class="hidden p-4 rounded-2xl text-left border text-sm transition-all duration-300 space-y-2">
+                        <div id="feedbackTitle" class="font-bold text-base flex items-center gap-2"></div>
+                        <div id="feedbackDetail" class="text-slate-700 leading-relaxed"></div>
+                        <button id="nextQBtn" onclick="nextQuestion()" class="mt-2 w-full py-2.5 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-900 transition flex items-center justify-center gap-2">
+                            <span>Soalan Seterusnya</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Summary Modal/Card -->
+            <div id="gameSummaryArea" class="hidden glass-card rounded-3xl p-8 shadow-xl text-center max-w-xl mx-auto space-y-6">
+                <div class="text-6xl animate-bounce">🎉</div>
+                <h2 class="font-display text-3xl font-bold text-slate-800">Syabas! Permainan Selesai</h2>
+                <p id="summarySubtitle" class="text-slate-600">Anda telah menyelesaikan cabaran ini dengan sangat cemerlang!</p>
+
+                <div class="grid grid-cols-3 gap-3 bg-white p-4 rounded-2xl border border-slate-200/80">
+                    <div>
+                        <div class="text-xs text-slate-400 font-semibold uppercase">Markah</div>
+                        <div id="summaryScore" class="text-2xl font-bold text-sky-600">0</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-slate-400 font-semibold uppercase">Ketepatan</div>
+                        <div id="summaryAccuracy" class="text-2xl font-bold text-emerald-600">0%</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-slate-400 font-semibold uppercase">Kombo Maks</div>
+                        <div id="summaryMaxStreak" class="text-2xl font-bold text-amber-500">0</div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                    <button onclick="restartCurrentGame()" class="flex-1 py-3 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-xl shadow-md transition">
+                        Main Lagi 🔄
+                    </button>
+                    <button onclick="switchTab('games')" class="flex-1 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl transition">
+                        Pilih Permainan Lain
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 2: NOTA & RUJUKAN TATABAHASA ================= -->
+        <section id="section-notes" class="tab-content hidden space-y-8">
+            <!-- Header Banner -->
+            <div class="glass-card rounded-3xl p-6 sm:p-8 bg-gradient-to-r from-sky-500/10 to-teal-500/10 border border-sky-200/60">
+                <h2 class="font-display text-2xl sm:text-3xl font-bold text-slate-800 mb-2">📚 Nota Padat Tatabahasa Tingkatan 1</h2>
+                <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
+                    Panduan ringkas dan komprehensif bagi topik <strong>Pola Ayat Dasar</strong> dan <strong>Perbandingan Semacam</strong>.
+                </p>
+            </div>
+
+            <!-- Pola Ayat Dasar Explanation Card -->
+            <div class="glass-card rounded-3xl p-6 sm:p-8 border border-white shadow-sm space-y-6">
+                <div class="flex items-center gap-3 border-b border-slate-200 pb-4">
+                    <span class="p-2 bg-sky-100 text-sky-700 rounded-xl font-bold text-xl">1</span>
+                    <h3 class="font-display text-2xl font-bold text-slate-800">4 Pola Ayat Dasar</h3>
+                </div>
+
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    Ayat dasar ialah ayat yang menjadi dasar atau sumber bagi pembentukan semua ayat lain dalam Bahasa Melayu. Semua ayat dasar terdiri daripada **Subjek (Frasa Nama)** dan **Predikat**.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Pola 1 -->
+                    <div class="bg-white p-5 rounded-2xl border border-sky-100 shadow-sm hover:border-sky-300 transition">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="px-3 py-1 bg-sky-100 text-sky-800 font-bold text-xs rounded-full">Pola 1</span>
+                            <span class="text-xs font-semibold text-slate-400">FN + FN</span>
+                        </div>
+                        <h4 class="font-bold text-slate-800 text-base mb-1">Frasa Nama + Frasa Nama</h4>
+                        <p class="text-xs text-slate-500 mb-3">Subjek dan predikat kedua-duanya terdiri daripada frasa nama.</p>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/60 text-xs space-y-1">
+                            <p><strong class="text-sky-600">Subjek:</strong> Bapa saya <span class="text-slate-400">(FN)</span></p>
+                            <p><strong class="text-teal-600">Predikat:</strong> seorang guru <span class="text-slate-400">(FN)</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Pola 2 -->
+                    <div class="bg-white p-5 rounded-2xl border border-emerald-100 shadow-sm hover:border-emerald-300 transition">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="px-3 py-1 bg-emerald-100 text-emerald-800 font-bold text-xs rounded-full">Pola 2</span>
+                            <span class="text-xs font-semibold text-slate-400">FN + FK</span>
+                        </div>
+                        <h4 class="font-bold text-slate-800 text-base mb-1">Frasa Nama + Frasa Kerja</h4>
+                        <p class="text-xs text-slate-500 mb-3">Subjek ialah frasa nama, manakala predikat ialah frasa kerja.</p>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/60 text-xs space-y-1">
+                            <p><strong class="text-sky-600">Subjek:</strong> Adik bongsu saya <span class="text-slate-400">(FN)</span></p>
+                            <p><strong class="text-emerald-600">Predikat:</strong> sedang tidur nyenyak <span class="text-slate-400">(FK)</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Pola 3 -->
+                    <div class="bg-white p-5 rounded-2xl border border-amber-100 shadow-sm hover:border-amber-300 transition">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="px-3 py-1 bg-amber-100 text-amber-800 font-bold text-xs rounded-full">Pola 3</span>
+                            <span class="text-xs font-semibold text-slate-400">FN + FA</span>
+                        </div>
+                        <h4 class="font-bold text-slate-800 text-base mb-1">Frasa Nama + Frasa Adjektif</h4>
+                        <p class="text-xs text-slate-500 mb-3">Subjek ialah frasa nama, manakala predikat ialah frasa adjektif (sifat).</p>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/60 text-xs space-y-1">
+                            <p><strong class="text-sky-600">Subjek:</strong> Bangunan sekolah itu <span class="text-slate-400">(FN)</span></p>
+                            <p><strong class="text-amber-600">Predikat:</strong> sangat tinggi <span class="text-slate-400">(FA)</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Pola 4 -->
+                    <div class="bg-white p-5 rounded-2xl border border-purple-100 shadow-sm hover:border-purple-300 transition">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="px-3 py-1 bg-purple-100 text-purple-800 font-bold text-xs rounded-full">Pola 4</span>
+                            <span class="text-xs font-semibold text-slate-400">FN + FS</span>
+                        </div>
+                        <h4 class="font-bold text-slate-800 text-base mb-1">Frasa Nama + Frasa Sendi Nama</h4>
+                        <p class="text-xs text-slate-500 mb-3">Predikat bermula dengan kata sendi nama (di, ke, dari, daripada, untuk, pada).</p>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/60 text-xs space-y-1">
+                            <p><strong class="text-sky-600">Subjek:</strong> Hadiah istimewa ini <span class="text-slate-400">(FN)</span></p>
+                            <p><strong class="text-purple-600">Predikat:</strong> untuk ibu tercinta <span class="text-slate-400">(FS)</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Perbandingan Semacam Flashcard Section -->
+            <div class="glass-card rounded-3xl p-6 sm:p-8 border border-white shadow-sm space-y-6">
+                <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                    <div class="flex items-center gap-3">
+                        <span class="p-2 bg-teal-100 text-teal-700 rounded-xl font-bold text-xl">2</span>
+                        <div>
+                            <h3 class="font-display text-2xl font-bold text-slate-800">Senarai Perbandingan Semacam</h3>
+                            <p class="text-xs text-slate-500">Gunakan kotak carian untuk mencari ungkapan yang diingini.</p>
+                        </div>
+                    </div>
+                    <input type="text" id="similesSearchInput" onkeyup="filterSimiles()" placeholder="🔍 Cari (cth: cermin, kancil)..." class="px-4 py-2 text-sm bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 w-full sm:w-64">
+                </div>
+
+                <!-- Grid of Interactive Flashcards -->
+                <div id="similesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                    <!-- Dynamic Similes Rendered via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 3: PENCAPAIAN & PRESTASI ================= -->
+        <section id="section-stats" class="tab-content hidden space-y-6">
+            <div class="glass-card rounded-3xl p-6 sm:p-8 border border-white space-y-6 shadow-sm">
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-500 to-indigo-600 text-white flex items-center justify-center text-3xl font-bold shadow-lg">
+                        🏆
+                    </div>
+                    <div>
+                        <h2 class="font-display text-2xl sm:text-3xl font-bold text-slate-800">Profil & Lencana Pencapaian</h2>
+                        <p class="text-slate-600 text-sm">Jejak kemajuan pembelajaran tatabahasa Bahasa Melayu anda di sini.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+                        <span class="text-xs font-bold text-slate-400 uppercase">Jumlah Soalan Dijawab</span>
+                        <div id="statsTotalAnswered" class="text-3xl font-extrabold text-sky-600 mt-1">0</div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+                        <span class="text-xs font-bold text-slate-400 uppercase">Ketepatan Keseluruhan</span>
+                        <div id="statsOverallAccuracy" class="text-3xl font-extrabold text-emerald-600 mt-1">0%</div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+                        <span class="text-xs font-bold text-slate-400 uppercase">Mata Terkumpul</span>
+                        <div id="statsPoints" class="text-3xl font-extrabold text-amber-500 mt-1">0</div>
+                    </div>
+                </div>
+
+                <!-- Badges List -->
+                <div>
+                    <h3 class="font-bold text-slate-800 text-lg mb-4">Lencana Keahlian Tatabahasa</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <!-- Badge 1 -->
+                        <div id="badge-1" class="bg-slate-100 p-4 rounded-2xl text-center border border-slate-200 opacity-60 transition duration-300">
+                            <div class="text-4xl mb-2">🌱</div>
+                            <h4 class="font-bold text-slate-800 text-sm">Permulaan Hijau</h4>
+                            <p class="text-xs text-slate-500 mt-1">Jawab 5 soalan pertama</p>
+                        </div>
+                        <!-- Badge 2 -->
+                        <div id="badge-2" class="bg-slate-100 p-4 rounded-2xl text-center border border-slate-200 opacity-60 transition duration-300">
+                            <div class="text-4xl mb-2">🔥</div>
+                            <h4 class="font-bold text-slate-800 text-sm">Kombo Berapi</h4>
+                            <p class="text-xs text-slate-500 mt-1">Capai 5 kombo berturut-turut</p>
+                        </div>
+                        <!-- Badge 3 -->
+                        <div id="badge-3" class="bg-slate-100 p-4 rounded-2xl text-center border border-slate-200 opacity-60 transition duration-300">
+                            <div class="text-4xl mb-2">👑</div>
+                            <h4 class="font-bold text-slate-800 text-sm">Pakar Pola Ayat</h4>
+                            <p class="text-xs text-slate-500 mt-1">Selesaikan 1 pusingan Pola Ayat</p>
+                        </div>
+                        <!-- Badge 4 -->
+                        <div id="badge-4" class="bg-slate-100 p-4 rounded-2xl text-center border border-slate-200 opacity-60 transition duration-300">
+                            <div class="text-4xl mb-2">🌟</div>
+                            <h4 class="font-bold text-slate-800 text-sm">Bintang Tatabahasa</h4>
+                            <p class="text-xs text-slate-500 mt-1">Kumpul 100 Mata Keseluruhan</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Audio Effects Generator using Web Audio API
+        class AudioFX {
+            constructor() {
+                this.ctx = null;
+                this.muted = false;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+
+            playCorrect() {
+                if (this.muted) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, this.ctx.currentTime); // C5
+                osc.frequency.exponentialRampToValueAtTime(659.25, this.ctx.currentTime + 0.1); // E5
+                osc.frequency.exponentialRampToValueAtTime(783.99, this.ctx.currentTime + 0.2); // G5
+                gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.3);
+            }
+
+            playIncorrect() {
+                if (this.muted) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, this.ctx.currentTime); // A3
+                osc.frequency.exponentialRampToValueAtTime(146.83, this.ctx.currentTime + 0.25); // D3
+                gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.25);
+            }
+
+            playFanfare() {
+                if (this.muted) return;
+                this.init();
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.1);
+                    gain.gain.setValueAtTime(0.15, this.ctx.currentTime + idx * 0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + idx * 0.1 + 0.3);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(this.ctx.currentTime + idx * 0.1);
+                    osc.stop(this.ctx.currentTime + idx * 0.1 + 0.3);
+                });
+            }
+        }
+
+        const sound = new AudioFX();
+
+        function toggleAudio() {
+            sound.muted = !sound.muted;
+            document.getElementById('soundIcon').innerText = sound.muted ? '🔇' : '🔊';
+        }
+
+        // Database 20 Soalan Pola Ayat Dasar (Tingkatan 1)
+        const polaAyatQuestions = [
+            {
+                sentence: "Encik Ramli seorang doktor pakar di Hospital Kuala Lumpur.",
+                correct: "FN + FN",
+                subjek: "Encik Ramli (Frasa Nama)",
+                predikat: "seorang doktor pakar... (Frasa Nama)",
+                explain: "Kedua-dua subjek dan predikat merupakan Frasa Nama."
+            },
+            {
+                sentence: "Kucing comel itu sedang tidur di atas sofa.",
+                correct: "FN + FK",
+                subjek: "Kucing comel itu (Frasa Nama)",
+                predikat: "sedang tidur di atas sofa (Frasa Kerja)",
+                explain: "Predikat mengandungi Kata Kerja 'tidur'."
+            },
+            {
+                sentence: "Pemandangan pantai di Pulau Redang amat indah.",
+                correct: "FN + FA",
+                subjek: "Pemandangan pantai di Pulau Redang (Frasa Nama)",
+                predikat: "amat indah (Frasa Adjektif)",
+                explain: "Predikat mengandungi Kata Adjektif 'indah' bersama kata penguat 'amat'."
+            },
+            {
+                sentence: "Surat kiriman tersebut daripada abangnya di Sarawak.",
+                correct: "FN + FS",
+                subjek: "Surat kiriman tersebut (Frasa Nama)",
+                predikat: "daripada abangnya di Sarawak (Frasa Sendi Nama)",
+                explain: "Predikat bermula dengan Kata Sendi Nama 'daripada'."
+            },
+            {
+                sentence: "Pelajar-pelajar Tingkatan 1 Angsana sedang berjoging di padang.",
+                correct: "FN + FK",
+                subjek: "Pelajar-pelajar Tingkatan 1 Angsana (Frasa Nama)",
+                predikat: "sedang berjoging... (Frasa Kerja)",
+                explain: "Predikat berintikan kata kerja 'berjoging'."
+            },
+            {
+                sentence: "Menara Kuala Lumpur sangat tinggi dan megah.",
+                correct: "FN + FA",
+                subjek: "Menara Kuala Lumpur (Frasa Nama)",
+                predikat: "sangat tinggi dan megah (Frasa Adjektif)",
+                explain: "Predikat menggunakan kata adjektif 'tinggi' dan 'megah'."
+            },
+            {
+                sentence: "Ibu Negeri Perak ialah Bandar Raya Ipoh.",
+                correct: "FN + FN",
+                subjek: "Ibu Negeri Perak (Frasa Nama)",
+                predikat: "Bandar Raya Ipoh (Frasa Nama)",
+                explain: "Predikat terdiri daripada Frasa Nama yang merujuk kata nama khas tempat."
+            },
+            {
+                sentence: "Hadiah hari lahir ini untuk sahabat karib saya.",
+                correct: "FN + FS",
+                subjek: "Hadiah hari lahir ini (Frasa Nama)",
+                predikat: "untuk sahabat karib saya (Frasa Sendi Nama)",
+                explain: "Predikat diawali oleh Kata Sendi Nama 'untuk'."
+            },
+            {
+                sentence: "Gadis bertudung biru itu sangat anggun.",
+                correct: "FN + FA",
+                subjek: "Gadis bertudung biru itu (Frasa Nama)",
+                predikat: "sangat anggun (Frasa Adjektif)",
+                explain: "Predikat menyatakan sifat 'anggun' (Frasa Adjektif)."
+            },
+            {
+                sentence: "Rombongan sekolah kami ke Muzium Negara esok.",
+                correct: "FN + FS",
+                subjek: "Rombongan sekolah kami (Frasa Nama)",
+                predikat: "ke Muzium Negara esok (Frasa Sendi Nama)",
+                explain: "Predikat diawali oleh Kata Sendi Nama 'ke'."
+            },
+            {
+                sentence: "Bapa saudara saya pengurus syarikat kewangan antarabangsa.",
+                correct: "FN + FN",
+                subjek: "Bapa saudara saya (Frasa Nama)",
+                predikat: "pengurus syarikat kewangan... (Frasa Nama)",
+                explain: "Subjek dan predikat kedua-duanya terdiri daripada Frasa Nama."
+            },
+            {
+                sentence: "Bas ekspres dari Kuala Lumpur itu baru tiba di stesen.",
+                correct: "FN + FK",
+                subjek: "Bas ekspres dari Kuala Lumpur itu (Frasa Nama)",
+                predikat: "baru tiba di stesen (Frasa Kerja)",
+                explain: "Predikat berintikan Kata Kerja 'tiba'."
+            },
+            {
+                sentence: "Udara segar di kawasan tanah tinggi itu sungguh dingin.",
+                correct: "FN + FA",
+                subjek: "Udara segar di kawasan tanah tinggi itu (Frasa Nama)",
+                predikat: "sungguh dingin (Frasa Adjektif)",
+                explain: "Predikat mengandungi Kata Adjektif 'dingin' berserta kata penguat."
+            },
+            {
+                sentence: "Borang permohonan biasiswa tersebut di atas meja pengetua.",
+                correct: "FN + FS",
+                subjek: "Borang permohonan biasiswa tersebut (Frasa Nama)",
+                predikat: "di atas meja pengetua (Frasa Sendi Nama)",
+                explain: "Predikat diawali oleh Kata Sendi Nama 'di'."
+            },
+            {
+                sentence: "Puan Salmah guru kaunseling di Sekolah Menengah Kebangsaan Seri Murni.",
+                correct: "FN + FN",
+                subjek: "Puan Salmah (Frasa Nama)",
+                predikat: "guru kaunseling di... (Frasa Nama)",
+                explain: "Subjek dan predikat kedua-duanya merupakan Frasa Nama."
+            },
+            {
+                sentence: "Sungai di belakang kampung kami agak cetek dan jernih.",
+                correct: "FN + FA",
+                subjek: "Sungai di belakang kampung kami (Frasa Nama)",
+                predikat: "agak cetek dan jernih (Frasa Adjektif)",
+                explain: "Predikat mengandungi Kata Adjektif 'cetek' dan 'jernih'."
+            },
+            {
+                sentence: "Datuk sedang berehat di pondok buruk sambil membaca akhbar.",
+                correct: "FN + FK",
+                subjek: "Datuk (Frasa Nama)",
+                predikat: "sedang berehat... (Frasa Kerja)",
+                explain: "Predikat berintikan Kata Kerja 'berehat'."
+            },
+            {
+                sentence: "Bungkusan kain batik halus ini dari negeri Kelantan.",
+                correct: "FN + FS",
+                subjek: "Bungkusan kain batik halus ini (Frasa Nama)",
+                predikat: "dari negeri Kelantan (Frasa Sendi Nama)",
+                explain: "Predikat bermula dengan Kata Sendi Nama 'dari'."
+            },
+            {
+                sentence: "Bangunan pencakar langit yang baharu dibina itu tinggi sungguh.",
+                correct: "FN + FA",
+                subjek: "Bangunan pencakar langit... itu (Frasa Nama)",
+                predikat: "tinggi sungguh (Frasa Adjektif)",
+                explain: "Predikat mengandungi Kata Adjektif 'tinggi'."
+            },
+            {
+                sentence: "Lembu-lembu milik Pak Cik Samad sedang meragut rumput di padang.",
+                correct: "FN + FK",
+                subjek: "Lembu-lembu milik Pak Cik Samad (Frasa Nama)",
+                predikat: "sedang meragut rumput... (Frasa Kerja)",
+                explain: "Predikat berintikan Kata Kerja 'meragut'."
+            }
+        ];
+
+        // Database Perbandingan Semacam (Tingkatan 1)
+        const similesData = [
+            { simile: "Jernih seperti cermin", keyword: "cermin", fill: "Jernih seperti _____", answer: "cermin", options: ["cermin", "air", "kaca", "kapas"], meaning: "Sangat jernih, bersih, lut sinar dan tidak keruh." },
+            { simile: "Bijak seperti kancil", keyword: "kancil", fill: "Bijak seperti _____", answer: "kancil", options: ["kancil", "murai", "lebai", "semut"], meaning: "Sangat cerdik dan bijaksana dalam membuat tindakan." },
+            { simile: "Pantas seperti kilat", keyword: "kilat", fill: "Pantas seperti _____", answer: "kilat", options: ["kilat", "angin", "belut", "kura-kura"], meaning: "Pergerakan yang sangat cepat." },
+            { simile: "Becok seperti murai", keyword: "murai", fill: "Becok seperti _____", answer: "murai", options: ["murai", "burung", "kancil", "iblis"], meaning: "Suka bercakap banyak tanpa henti." },
+            { simile: "Licin seperti belut", keyword: "belut", fill: "Licin seperti _____", answer: "belut", options: ["belut", "minyak", "kapas", "cermin"], meaning: "Sukar ditangkap atau sangat licin." },
+            { simile: "Manis seperti gula", keyword: "gula", fill: "Manis seperti _____", answer: "gula", options: ["gula", "bunga", "hempedu", "kunyit"], meaning: "Rasa atau senyuman yang sangat manis." },
+            { simile: "Rajin seperti semut", keyword: "semut", fill: "Rajin seperti _____", answer: "semut", options: ["semut", "lebah", "kancil", "burung"], meaning: "Sangat tekun dan rajin bekerja." },
+            { simile: "Berat seperti batu", keyword: "batu", fill: "Berat seperti _____", answer: "batu", options: ["batu", "besi", "galah", "kapas"], meaning: "Mempunyai timbangan yang sangat berat." },
+            { simile: "Pahit seperti hempedu", keyword: "hempedu", fill: "Pahit seperti _____", answer: "hempedu", options: ["hempedu", "ubat", "garam", "racun"], meaning: "Rasa yang sangat pahit." },
+            { simile: "Tinggi seperti galah", keyword: "galah", fill: "Tinggi seperti _____", answer: "galah", options: ["galah", "pokok", "menara", "gunung"], meaning: "Ketinggian fizikal seseorang yang amat tinggi." },
+            { simile: "Putih seperti kapas", keyword: "kapas", fill: "Putih seperti _____", answer: "kapas", options: ["kapas", "susu", "salji", "kertas"], meaning: "Warna yang sangat putih dan bersih." },
+            { simile: "Tajam seperti sembilu", keyword: "sembilu", fill: "Tajam seperti _____", answer: "sembilu", options: ["sembilu", "pedang", "pisau", "duri"], meaning: "Sangat tajam (terutamanya kata-kata atau pandangan)." },
+            { simile: "Adil seperti hakim", keyword: "hakim", fill: "Adil seperti _____", answer: "hakim", options: ["hakim", "raja", "guru", "polisi"], meaning: "Saksama dan tidak menyebelahi mana-mana pihak." },
+            { simile: "Bebas seperti burung", keyword: "burung", fill: "Bebas seperti _____", answer: "burung", options: ["burung", "angin", "awan", "ikan"], meaning: "Bebas ke mana-mana tanpa sebarang halangan." },
+            { simile: "Harum seperti bunga", keyword: "bunga", fill: "Harum seperti _____", answer: "bunga", options: ["bunga", "pandan", "minyak", "kasturi"], meaning: "Bau yang sangat wangi dan menyenangkan." },
+            { simile: "Busuk seperti bangkai", keyword: "bangkai", fill: "Busuk seperti _____", answer: "bangkai", options: ["bangkai", "sampah", "hempedu", "batu"], meaning: "Bau yang amat tidak menyenangkan atau sangat busuk." }
+        ];
+
+        let appState = {
+            points: 0,
+            streak: 0,
+            totalAnswered: 0,
+            correctCount: 0,
+            currentGame: null,
+            gameQuestions: [],
+            currentQIdx: 0,
+            gameScore: 0,
+            maxStreakInGame: 0
+        };
+
+        // Navigation Switcher
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('border-sky-500', 'text-sky-600', 'font-bold');
+                btn.classList.add('border-transparent', 'text-slate-600');
+            });
+
+            document.getElementById(`section-${tabName}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-${tabName}`);
+            if (activeBtn) {
+                activeBtn.classList.add('border-sky-500', 'text-sky-600', 'font-bold');
+                activeBtn.classList.remove('border-transparent', 'text-slate-600');
+            }
+
+            if (tabName === 'notes') {
+                renderSimilesGrid(similesData);
+            } else if (tabName === 'stats') {
+                updateStatsUI();
+            }
+        }
+
+        function startGame(mode) {
+            appState.currentGame = mode;
+            appState.currentQIdx = 0;
+            appState.gameScore = 0;
+            appState.maxStreakInGame = 0;
+
+            document.getElementById('gameMenu').classList.add('hidden');
+            document.getElementById('gameSummaryArea').classList.add('hidden');
+            document.getElementById('activeGameArea').classList.remove('hidden');
+
+            if (mode === 'pola') {
+                // Pick ALL 20 questions for the Pola Ayat challenge
+                appState.gameQuestions = [...polaAyatQuestions].sort(() => 0.5 - Math.random()).slice(0, 20);
+                document.getElementById('questionCategoryBadge').innerText = 'Pola Ayat Dasar (20 Soalan)';
+            } else {
+                // Prepare Perbandingan Questions
+                appState.gameQuestions = [...similesData].sort(() => 0.5 - Math.random()).slice(0, 10);
+                document.getElementById('questionCategoryBadge').innerText = 'Perbandingan Semacam';
+            }
+
+            document.getElementById('totalQNum').innerText = appState.gameQuestions.length;
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const q = appState.gameQuestions[appState.currentQIdx];
+            document.getElementById('currentQNum').innerText = appState.currentQIdx + 1;
+            
+            // Progress Bar update
+            const pct = ((appState.currentQIdx) / appState.gameQuestions.length) * 100;
+            document.getElementById('gameProgressBar').style.width = `${pct}%`;
+
+            // Reset feedback banner
+            const fb = document.getElementById('feedbackBanner');
+            fb.classList.add('hidden');
+            fb.className = "hidden p-4 rounded-2xl text-left border text-sm transition-all duration-300 space-y-2";
+
+            const promptEl = document.getElementById('questionPrompt');
+            const gridEl = document.getElementById('answerOptionsGrid');
+            gridEl.innerHTML = '';
+
+            if (appState.currentGame === 'pola') {
+                promptEl.innerHTML = `<span class="text-xs text-slate-400 font-normal uppercase block mb-1">Apakah Pola Ayat Bagi:</span>"${q.sentence}"`;
+                
+                const options = ["FN + FN", "FN + FK", "FN + FA", "FN + FS"];
+                options.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = "py-4 px-5 bg-white hover:bg-sky-50 border-2 border-slate-200 hover:border-sky-400 rounded-2xl font-bold text-slate-700 text-base sm:text-lg transition-all duration-200 shadow-sm text-center btn-press hover:scale-[1.02]";
+                    btn.innerText = opt;
+                    btn.onclick = () => handleGameAnswer(opt, q.correct, q);
+                    gridEl.appendChild(btn);
+                });
+            } else {
+                promptEl.innerHTML = `<span class="text-xs text-slate-400 font-normal uppercase block mb-1">Lengkapkan Perbandingan Semacam:</span>"${q.fill}"`;
+
+                q.options.sort(() => 0.5 - Math.random()).forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = "py-4 px-5 bg-white hover:bg-teal-50 border-2 border-slate-200 hover:border-teal-400 rounded-2xl font-bold text-slate-700 text-base sm:text-lg transition-all duration-200 shadow-sm text-center btn-press hover:scale-[1.02]";
+                    btn.innerText = opt;
+                    btn.onclick = () => handleGameAnswer(opt, q.answer, q);
+                    gridEl.appendChild(btn);
+                });
+            }
+        }
+
+        function handleGameAnswer(selected, correct, qData) {
+            // Disable all buttons in grid
+            const btns = document.querySelectorAll('#answerOptionsGrid button');
+            btns.forEach(b => b.disabled = true);
+
+            const isCorrect = (selected === correct);
+            appState.totalAnswered++;
+
+            const fb = document.getElementById('feedbackBanner');
+            const fbTitle = document.getElementById('feedbackTitle');
+            const fbDetail = document.getElementById('feedbackDetail');
+
+            fb.classList.remove('hidden');
+
+            if (isCorrect) {
+                sound.playCorrect();
+                appState.streak++;
+                if (appState.streak > appState.maxStreakInGame) {
+                    appState.maxStreakInGame = appState.streak;
+                }
+                const earnedPoints = 10 + (appState.streak * 2);
+                appState.points += earnedPoints;
+                appState.gameScore += 10;
+                appState.correctCount++;
+
+                fb.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-900');
+                fbTitle.innerHTML = `✅ Tahniah! Jawapan Betul (+${earnedPoints} Mata)`;
+                
+                if (appState.currentGame === 'pola') {
+                    fbDetail.innerHTML = `<strong>Subjek:</strong> ${qData.subjek}<br><strong>Predikat:</strong> ${qData.predikat}<br><em>${qData.explain}</em>`;
+                } else {
+                    fbDetail.innerHTML = `<strong>Maksud:</strong> ${qData.meaning}`;
+                }
+            } else {
+                sound.playIncorrect();
+                appState.streak = 0;
+
+                fb.classList.add('bg-rose-50', 'border-rose-200', 'text-rose-900');
+                fbTitle.innerHTML = `❌ Kurang Tepat! Jawapan Sebenar: <span class="underline">${correct}</span>`;
+
+                if (appState.currentGame === 'pola') {
+                    fbDetail.innerHTML = `<strong>Subjek:</strong> ${qData.subjek}<br><strong>Predikat:</strong> ${qData.predikat}<br><em>${qData.explain}</em>`;
+                } else {
+                    fbDetail.innerHTML = `<strong>Maksud:</strong> ${qData.meaning}`;
+                }
+            }
+
+            updateTopHeaderStats();
+            checkBadges();
+        }
+
+        function nextQuestion() {
+            appState.currentQIdx++;
+            if (appState.currentQIdx >= appState.gameQuestions.length) {
+                finishGame();
+            } else {
+                renderQuestion();
+            }
+        }
+
+        function finishGame() {
+            sound.playFanfare();
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+            }
+
+            document.getElementById('activeGameArea').classList.add('hidden');
+            document.getElementById('gameSummaryArea').classList.remove('hidden');
+
+            const accuracy = Math.round((appState.gameScore / (appState.gameQuestions.length * 10)) * 100);
+            
+            document.getElementById('summaryScore').innerText = appState.gameScore;
+            document.getElementById('summaryAccuracy').innerText = `${accuracy}%`;
+            document.getElementById('summaryMaxStreak').innerText = appState.maxStreakInGame;
+        }
+
+        function restartCurrentGame() {
+            if (appState.currentGame) {
+                startGame(appState.currentGame);
+            } else {
+                switchTab('games');
+            }
+        }
+
+        function quitGame() {
+            document.getElementById('activeGameArea').classList.add('hidden');
+            document.getElementById('gameSummaryArea').classList.add('hidden');
+            document.getElementById('gameMenu').classList.remove('hidden');
+        }
+
+        function renderSimilesGrid(data) {
+            const container = document.getElementById('similesGrid');
+            container.innerHTML = '';
+
+            data.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md hover:border-teal-300 transition space-y-1.5";
+                card.innerHTML = `
+                    <div class="font-bold text-teal-800 text-base">${item.simile}</div>
+                    <div class="text-xs text-slate-600 leading-relaxed">${item.meaning}</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function filterSimiles() {
+            const query = document.getElementById('similesSearchInput').value.toLowerCase();
+            const filtered = similesData.filter(item => 
+                item.simile.toLowerCase().includes(query) || 
+                item.meaning.toLowerCase().includes(query)
+            );
+            renderSimilesGrid(filtered);
+        }
+
+        function updateTopHeaderStats() {
+            document.getElementById('streakCount').innerText = appState.streak;
+            document.getElementById('totalPoints').innerText = appState.points;
+        }
+
+        function updateStatsUI() {
+            document.getElementById('statsTotalAnswered').innerText = appState.totalAnswered;
+            
+            const acc = appState.totalAnswered > 0 ? Math.round((appState.correctCount / appState.totalAnswered) * 100) : 0;
+            document.getElementById('statsOverallAccuracy').innerText = `${acc}%`;
+            document.getElementById('statsPoints').innerText = appState.points;
+        }
+
+        function checkBadges() {
+            // Badge 1: 5 Soalan Dijawab
+            if (appState.totalAnswered >= 5) {
+                unlockBadge('badge-1');
+            }
+            // Badge 2: Kombo 5
+            if (appState.streak >= 5 || appState.maxStreakInGame >= 5) {
+                unlockBadge('badge-2');
+            }
+            // Badge 3: Selesaikan Permainan Pola
+            if (appState.currentGame === 'pola' && appState.currentQIdx >= 5) {
+                unlockBadge('badge-3');
+            }
+            // Badge 4: Kumpul 100 Mata Keseluruhan
+            if (appState.points >= 100) {
+                unlockBadge('badge-4');
+            }
+        }
+
+        function unlockBadge(badgeId) {
+            const el = document.getElementById(badgeId);
+            if (el) {
+                el.classList.remove('opacity-60', 'bg-slate-100');
+                el.classList.add('bg-white', 'shadow-md', 'border-amber-300', 'ring-2', 'ring-amber-400/30');
+            }
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            renderSimilesGrid(similesData);
+            updateTopHeaderStats();
+        };
+    </script>
+</body>
+</html>
